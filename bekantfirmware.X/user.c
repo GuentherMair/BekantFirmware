@@ -8,6 +8,12 @@
     #include <htc.h>        /* HiTech General Include File */
 #endif
 
+/* For syntax-only checks without the real XC8 PIC SFR headers,
+ * BEKANT_TEST_SYNTAX pulls in a stub. */
+#ifdef BEKANT_TEST_SYNTAX
+#include "../test_sfr_stubs.h"
+#endif
+
 #include <stdint.h>         /* For uint8_t definition */
 #include <stdbool.h>        /* For true/false definition */
 

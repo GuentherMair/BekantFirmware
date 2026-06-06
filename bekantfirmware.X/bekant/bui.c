@@ -6,6 +6,12 @@
 #include "bctrl.h"
 #include <stdlib.h> // abs()
 
+/* For syntax-only checks without the real XC8 PIC SFR headers,
+ * BEKANT_TEST_SYNTAX pulls in a stub. */
+#ifdef BEKANT_TEST_SYNTAX
+#include "test_sfr_stubs.h"
+#endif
+
 typedef enum {
     BUI_STOP,
     BUI_UP,

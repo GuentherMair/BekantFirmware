@@ -3,10 +3,15 @@
  */
 
 #include <stdlib.h>
+
+/* For syntax-only checks without the real XC8 PIC SFR headers,
+ * BEKANT_TEST_SYNTAX pulls in a stub. */
+#ifdef BEKANT_TEST_SYNTAX
+#include "test_sfr_stubs.h"
+#endif
 #include <stdbool.h>
 #include "bctrl.h"
 #include "../lin/lin_d.h"
-#include <pic.h>
 
 void (*bctrl_report_pos)(int16_t pos);
 void bctrl_populate_cmd(void);
@@ -327,7 +332,7 @@ void bctrl_init(void) {
     //   0.005 sec
     //   5 msec
     T4CONbits.T4CKPS = 0b10; // Prescaler is 16
-    PR4bits.PR4 = 0x7d; // Period: 125
+    PR4bits.value = 0x7d; // Period: 125
     T4CONbits.T4OUTPS = 0b1001; // 1:10 Postscaler
 
     T4CONbits.TMR4ON = 1; // Timer is on

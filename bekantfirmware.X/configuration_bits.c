@@ -27,4 +27,10 @@
 
 #include <xc.h>
 
+/* For syntax-only checks without the real XC8 PIC SFR headers,
+ * BEKANT_TEST_SYNTAX pulls in a stub. */
+#ifdef BEKANT_TEST_SYNTAX
+#include "test_sfr_stubs.h"
+#endif
+
 

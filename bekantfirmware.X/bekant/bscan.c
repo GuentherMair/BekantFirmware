@@ -3,8 +3,14 @@
  */
 
 #include <stdint.h>
+
+/* For syntax-only checks without the real XC8 PIC SFR headers,
+ * BEKANT_TEST_SYNTAX pulls in a stub. */
+#ifdef BEKANT_TEST_SYNTAX
+#include "test_sfr_stubs.h"
+#endif
 #include <stdbool.h>
-#include <pic.h>
+#include <xc.h>
 #include "bscan.h"
 #include "../lin/lin_d.h"
 
@@ -47,7 +53,7 @@ void bscan_init() {
     //   0.01 sec
     //   10 msec
     T4CONbits.T4CKPS = 0b10; // Prescaler is 16
-    PR4 = 250; // Period: 250
+    PR4reg_storage = 250; // Period: 250
     T4CONbits.T4OUTPS = 0b1001; // 1:10 Postscaler
 
     PIE3bits.TMR4IE = 0; // Disable Timer4 interrupt
