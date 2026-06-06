@@ -1,3 +1,10 @@
+# IMPORTANT
+
+This is as yet mostly untested as I am still waiting for the PIC programmer.
+
+**USE AT YOUR OWN RISK.**
+
+
 # BEKANT Firmware
 
 This is a fork-of-fork of the IKEA BEKANT adjustable-height desk
@@ -351,6 +358,14 @@ guaranteed rollback**.
 - [docs/COMPARISON.md](docs/COMPARISON.md) — ivanwick vs DieSteinhose
 - [docs/TRACE.md](docs/TRACE.md) — state-machine traces
 - [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) — endstop fix analysis
+
+## References
+
+1. <a name="1">https://web.archive.org/web/20190116092248/https://blog.rnix.de/hacking-ikea-bekant/</a>
+2. <a name="2">https://github.com/trainman419/bekant</a>
+3. <a name="3">https://github.com/robin7331/IKEA-Hackant</a>
+4. <a name="4">https://github.com/diodenschein/TableMem</a>
+5. <a name="5">https://en.wikipedia.org/wiki/Local_Interconnect_Network</a>
 
 ## Disclaimer
 
