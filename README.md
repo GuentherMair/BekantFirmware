@@ -21,7 +21,7 @@ This project:
    DieSteinhose "double-tap", or mix and match. The unified state
    machine in `btn/btn.c` handles both.
 2. **Includes a best-effort C reconstruction** of the original IKEA
-   firmware in `bekantfirmware.X/orig_reconstruction/`, for future
+   firmware in `orig_reconstruction/`, for future
    reference and to verify the endstop behaviour described in
    [ivanwick issue #4](https://github.com/ivanwick/bekantfirmware/issues/4).
 
@@ -35,7 +35,7 @@ touched.
 - **[docs/COMPARISON.md](docs/COMPARISON.md)** — how the two upstreams differ and how this project handles both
 - **[docs/TRACE.md](docs/TRACE.md)** — state-machine traces you can audit by hand
 - **[docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md)** — endstop / over-travel analysis (issue #4)
-- **[bekantfirmware.X/orig_reconstruction/](bekantfirmware.X/orig_reconstruction/)** — reconstructed C code of the original IKEA firmware, with the disassembly
+- **[orig_reconstruction/](orig_reconstruction/)** — reconstructed C code of the original IKEA firmware, with the disassembly
 
 ## Project layout
 
@@ -43,12 +43,18 @@ touched.
 bekant-compound/
 ├── README.md
 ├── USAGE.md
-├── deliverable.md
 ├── docs/
 │   ├── COMPARISON.md
-│   ├── TRACE.md
-│   └── ENDSTOP_ANALYSIS.md
-└── bekantfirmware.X/
+│   ├── DELIVERABLE.md
+│   ├── ENDSTOP_ANALYSIS.md
+│   └── TRACE.md
+├── orig_reconstruction/                ← reverse-engineered reference impl
+│   ├── README.md
+│   ├── main.c / system.c / user.c / interrupts.c / configuration_bits.c
+│   ├── btn/ lin/ bekant/
+│   ├── bekant/orig_endstop.c           ← recovered endstop detector
+│   └── disassembly/                    ← orginafirm.hex + .asm dumps
+└── src/
     ├── README-ORIGINAL.md              ← preserved from ivanwick
     ├── main.c
     ├── configuration_bits.c
@@ -61,14 +67,7 @@ bekant-compound/
     ├── bekant/bscan.c / bscan.h         ← startup bus scan
     ├── bekant/bctrl.c / bctrl.h         ← LIN control plane
     ├── bekant/bui.c / bui.h             ← upper-level UI
-    ├── test_sfr_stubs.h / .c            ← syntax-check shim (no real XC8)
-    ├── nbproject/                       ← MPLAB X project files
-    └── orig_reconstruction/             ← reverse-engineered reference impl
-        ├── README.md
-        ├── main.c / system.c / user.c / interrupts.c / configuration_bits.c
-        ├── btn/ lin/ bekant/
-        ├── bekant/orig_endstop.c        ← recovered endstop detector
-        └── disassembly/                  ← orginafirm.hex + .asm dumps
+    └── test_sfr_stubs.h / .c            ← syntax-check shim (no real XC8)
 ```
 
 ## Building and uploading
@@ -108,34 +107,26 @@ number "1" on the silkscreen.
 
 ### 1. Get the toolchain
 
-You need Microchip's MPLAB X IDE with the XC8 C compiler. The XC8
-compiler is free (the free mode is fine — it optimises less than
-the PRO mode but produces working code).
+You need Microchip's XC8 C compiler. The free mode is fine — it
+optimises less than the PRO mode but produces working code.
 
-- Download MPLAB X: <https://www.microchip.com/mplab/mplab-x-ide>
-- XC8 comes bundled in the MPLAB X installer. If you want a CLI-only
-  install, you can download just the XC8 compiler from
-  <https://www.microchip.com/mplab/compilers>.
+- Download XC8: <https://www.microchip.com/mplab/compilers>
 
-Confirm both are installed:
+Confirm installation:
 
 ```sh
-xc8 --version
+xc8-cc --version
 ```
 
-### 2. Open the project in MPLAB X
+### 2. Build with make
 
 ```sh
-# Either use the IDE:
-mplabxide bekantfirmware.X/nbproject/
-
-# Or build from the command line using the makefile generated
-# by the IDE (run this once in the IDE to generate it).
-cd bekantfirmware.X
+cd src
 make
 ```
 
-The default build produces `bekantfirmware.X/dist/default/production/bekantfirmware.X.production.hex`.
+The build produces `src/dist/default/bekantfirmware.elf`
+and `src/dist/default/bekantfirmware.hex`.
 
 ### 3. Open the BEKANT controller
 
@@ -223,7 +214,7 @@ In MPLAB X IDE:
 From the command line with the PICkit 3 standalone tool:
 
 ```sh
-pk3cmd -P PIC16LF1938 -F bekantfirmware.X/dist/default/production/bekantfirmware.X.production.hex -M -Y
+pk3cmd -P PIC16LF1938 -F src/dist/default/production/src.production.hex -M -Y
 ```
 
 ### 6. Restore the EEPROM defaults (optional)
@@ -314,10 +305,8 @@ chip (which clears the CP bit along with the firmware). After
 erasing, you can write the new firmware normally:
 
 ```sh
-# In MPLAB X IDE: Production → Erase Flash Memory, then Make and Program
-# From the command line:
 pk3cmd -P PIC16LF1938 -E  # erase
-pk3cmd -P PIC16LF1938 -F bekantfirmware.X/dist/default/production/bekantfirmware.X.production.hex -M -Y
+pk3cmd -P PIC16LF1938 -F src/dist/default/production/src.production.hex -M -Y
 ```
 
 ### Reference firmware dump for code-protected units
@@ -327,7 +316,7 @@ back, the ivanwick project bundles a reference dump
 ([`orginafirm.hex.zip`](https://github.com/ivanwick/bekantfirmware/files/7874509/orginafirm.hex.zip))
 that you can flash to restore factory behaviour. This dump is
 bundled with this project too — see
-`bekantfirmware.X/orig_reconstruction/disassembly/orginafirm.hex`.
+`orig_reconstruction/disassembly/orginafirm.hex`.
 
 **Caveats:**
 

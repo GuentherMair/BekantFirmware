@@ -8,12 +8,12 @@ the desk is commanded to its physical bottom (or top), the relay
 stays engaged instead of being released. The root cause is a missing
 module — the ivanwick project has no equivalent of the original IKEA
 firmware's endstop detector. The fix is a small, self-contained
-module (see `bekantfirmware.X/orig_reconstruction/bekant/orig_endstop.c`)
+module (see `orig_reconstruction/bekant/orig_endstop.c`)
 that watches the leg encoders and forces BCMD_STOP (0xfc) when motion
 is commanded but the encoder has stopped advancing.
 
 The reconstructed C code, the disassembly, and the analysis below are
-kept under `bekantfirmware.X/orig_reconstruction/` for future
+kept under `orig_reconstruction/` for future
 reference.
 
 ## What issue #4 actually says
@@ -150,7 +150,7 @@ leg to move, and the relay stays on. **This is the bug.**
 
 ## The fix
 
-`bekantfirmware.X/orig_reconstruction/bekant/orig_endstop.c` is a
+`orig_reconstruction/bekant/orig_endstop.c` is a
 ~150-line module that:
 
 1. Watches the leg encoder (via `bctrl_report_pos`, which the
@@ -190,7 +190,7 @@ recovered. It lives in the same state machine (disassembly
 **0x05c0–0x068d**), with the magic-byte check at **0x05d8**.
 
 The reconstructed code in
-`bekantfirmware.X/orig_reconstruction/bekant/bui.c::bui_factory_reset()`
+`orig_reconstruction/bekant/bui.c::bui_factory_reset()`
 implements the reset, but it is **not** wired up to the button
 state machine in this reconstruction. A full implementation
 would extend `btn/btn.c` with a second SAVE_HOLD_THRESHOLD of 200
@@ -331,7 +331,7 @@ The root cause is a missing endstop-detector module that the
 original IKEA firmware has. The fix is a small (~150 line)
 self-contained module that watches the encoder and forces a STOP
 when motion is commanded but no progress is being made. The
-fix is in `bekantfirmware.X/orig_reconstruction/bekant/orig_endstop.c`
+fix is in `orig_reconstruction/bekant/orig_endstop.c`
 and integrates with the existing ivanwick project via a single
 line in `user.c::InitApp()`.
 

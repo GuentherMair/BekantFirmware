@@ -6,7 +6,7 @@ This deliverable contains:
    gesture variants (ivanwick combo-press and DieSteinhose
    double-tap) **in parallel** from a single build.
 2. A **best-effort C reconstruction** of the original IKEA firmware
-   (from `orginafirm.hex`) inside `bekantfirmware.X/orig_reconstruction/`.
+   (from `orginafirm.hex`) inside `orig_reconstruction/`.
 3. An **endstop / over-travel analysis** that explains the root
    cause of [ivanwick/bekantfirmware issue #4](https://github.com/ivanwick/bekantfirmware/issues/4)
    and proposes a fix.
@@ -18,9 +18,9 @@ This deliverable contains:
 - [`docs/COMPARISON.md`](docs/COMPARISON.md) — ivanwick vs DieSteinhose
 - [`docs/TRACE.md`](docs/TRACE.md) — state-machine traces
 - [`docs/ENDSTOP_ANALYSIS.md`](docs/ENDSTOP_ANALYSIS.md) — endstop bug analysis
-- [`bekantfirmware.X/orig_reconstruction/`](bekantfirmware.X/orig_reconstruction/) —
+- [`orig_reconstruction/`](orig_reconstruction/) —
   reconstructed C code of the original IKEA firmware
-- [`bekantfirmware.X/orig_reconstruction/disassembly/`](bekantfirmware.X/orig_reconstruction/disassembly/) —
+- [`orig_reconstruction/disassembly/`](orig_reconstruction/disassembly/) —
   the disassembly files (`.hex` and two `.asm` variants) for reference
 
 ## Tree
@@ -29,12 +29,41 @@ This deliverable contains:
 bekant-compound/
 ├── README.md                                       ← top-level
 ├── USAGE.md                                        ← end-user button reference
-├── deliverable.md                                  ← this file
 ├── docs/
 │   ├── COMPARISON.md
-│   ├── TRACE.md
-│   └── ENDSTOP_ANALYSIS.md
-└── bekantfirmware.X/
+│   ├── DELIVERABLE.md                              ← this file
+│   ├── ENDSTOP_ANALYSIS.md
+│   └── TRACE.md
+├── orig_reconstruction/                            ← best-effort C reconstruction
+│   ├── README.md
+│   ├── main.c
+│   ├── configuration_bits.c
+│   ├── system.c
+│   ├── system.h
+│   ├── user.c
+│   ├── user.h
+│   ├── interrupts.c
+│   ├── test_sfr_stubs.h
+│   ├── test_sfr_stubs.c
+│   ├── bekant/
+│   │   ├── bctrl.c                                 ← uses recovered OEM BCMD values
+│   │   ├── bctrl.h
+│   │   ├── bscan.c
+│   │   ├── bscan.h
+│   │   ├── bui.c
+│   │   ├── bui.h
+│   │   └── orig_endstop.c                          ← RECOVERED endstop detector
+│   ├── btn/
+│   │   ├── btn.c
+│   │   └── btn.h
+│   ├── lin/
+│   │   ├── lin_d.c
+│   │   └── lin_d.h
+│   └── disassembly/
+│       ├── orginafirm.hex                          ← original Intel HEX
+│       ├── orginafirm_disasm.asm                   ← gpdasm output
+│       └── orginafirm_disasm_nos.asm               ← gpdasm with labels
+└── src/
     ├── README-ORIGINAL.md                          ← preserved from ivanwick
     ├── main.c
     ├── configuration_bits.c
@@ -57,38 +86,9 @@ bekant-compound/
     ├── btn/
     │   ├── btn.c                                   ← REWRITTEN: unified state machine
     │   └── btn.h                                   ← REWRITTEN: documents both gestures
-    ├── lin/
-    │   ├── lin_d.c
-    │   └── lin_d.h
-    └── orig_reconstruction/                        ← best-effort C reconstruction
-        ├── README.md
-        ├── main.c
-        ├── configuration_bits.c
-        ├── system.c
-        ├── system.h
-        ├── user.c
-        ├── user.h
-        ├── interrupts.c
-        ├── test_sfr_stubs.h
-        ├── test_sfr_stubs.c
-        ├── bekant/
-        │   ├── bctrl.c                             ← uses recovered OEM BCMD values
-        │   ├── bctrl.h
-        │   ├── bscan.c
-        │   ├── bscan.h
-        │   ├── bui.c
-        │   ├── bui.h
-        │   └── orig_endstop.c                      ← RECOVERED endstop detector
-        ├── btn/
-        │   ├── btn.c
-        │   └── btn.h
-        ├── lin/
-        │   ├── lin_d.c
-        │   └── lin_d.h
-        └── disassembly/
-            ├── orginafirm.hex                      ← original Intel HEX
-            ├── orginafirm_disasm.asm               ← gpdasm output
-            └── orginafirm_disasm_nos.asm           ← gpdasm with labels
+    └── lin/
+        ├── lin_d.c
+        └── lin_d.h
 ```
 
 ## How the unified gesture works
@@ -111,16 +111,16 @@ Build command (single, no flag required):
 
 ```sh
 xc8 --chip=PIC16LF1938 --std=c99 --runtime=+clear \
-    bekantfirmware.X/main.c \
-    bekantfirmware.X/system.c \
-    bekantfirmware.X/user.c \
-    bekantfirmware.X/configuration_bits.c \
-    bekantfirmware.X/interrupts.c \
-    bekantfirmware.X/btn/btn.c \
-    bekantfirmware.X/lin/lin_d.c \
-    bekantfirmware.X/bekant/bscan.c \
-    bekantfirmware.X/bekant/bctrl.c \
-    bekantfirmware.X/bekant/bui.c
+    src/main.c \
+    src/system.c \
+    src/user.c \
+    src/configuration_bits.c \
+    src/interrupts.c \
+    src/btn/btn.c \
+    src/lin/lin_d.c \
+    src/bekant/bscan.c \
+    src/bekant/bctrl.c \
+    src/bekant/bui.c
 ```
 
 For step-by-step build + flash instructions, see
@@ -131,7 +131,7 @@ For step-by-step build + flash instructions, see
 
 Three small changes:
 
-1. Copy `bekantfirmware.X/orig_reconstruction/bekant/orig_endstop.c` and
+1. Copy `orig_reconstruction/bekant/orig_endstop.c` and
    `bekant/orig_endstop.h` into the ivanwick project.
 2. In `main.c`, add `orig_endstop_init();` next to `bui_init()`.
 3. In `user.c::InitApp()`, add the line
