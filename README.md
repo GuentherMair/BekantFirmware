@@ -121,7 +121,6 @@ xc8-cc --version
 ### 2. Build with make
 
 ```sh
-cd src
 make
 ```
 
