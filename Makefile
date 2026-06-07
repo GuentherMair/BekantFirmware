@@ -2,15 +2,16 @@ CC      = xc8-cc
 MCU     = pic16lf1938
 
 SRCDIR   = src
-BUILDDIR = src/build/default
-DISTDIR  = src/dist/default
+BUILDDIR = build
+DISTDIR  = dist
+DFPDIR   = dfp
 TARGET   = $(DISTDIR)/bekantfirmware
 
 # Device Family Pack — download once with: make dfp
 DFP_NAME    = Microchip.PIC12-16F1xxx_DFP
 DFP_VERSION = 1.9.258
-DFP_ATPACK  = dfp/$(DFP_NAME).$(DFP_VERSION).atpack
-DFP_DIR     = dfp/pic12-16f1xxx/xc8
+DFP_ATPACK  = $(DFPDIR)/$(DFP_NAME).$(DFP_VERSION).atpack
+DFP_XC8_DIR = $(DFPDIR)/pic12-16f1xxx/xc8
 
 SRCS = \
     main.c \
@@ -26,14 +27,14 @@ SRCS = \
 
 OBJS = $(patsubst %.c,$(BUILDDIR)/%.p1,$(SRCS))
 
-CFLAGS  = -mcpu=$(MCU) -mdfp=$(DFP_DIR) -std=c99 -O0 -I$(SRCDIR)
-LDFLAGS = -mcpu=$(MCU) -mdfp=$(DFP_DIR) -std=c99 -mstack=compiled
+CFLAGS  = -mcpu=$(MCU) -mdfp=$(DFP_XC8_DIR) -std=c99 -O0 -I$(SRCDIR)
+LDFLAGS = -mcpu=$(MCU) -mdfp=$(DFP_XC8_DIR) -std=c99 -mstack=compiled
 
 .PHONY: all build clean clobber dfp
 
 all: build
 
-build: $(DFP_DIR) $(TARGET).elf
+build: $(DFP_XC8_DIR) $(TARGET).elf
 
 $(TARGET).elf: $(OBJS)
 	@mkdir -p $(DISTDIR)
@@ -44,17 +45,17 @@ $(BUILDDIR)/%.p1: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Download and extract the Device Family Pack
-dfp: $(DFP_DIR)
+dfp: $(DFP_XC8_DIR)
 
-$(DFP_DIR): $(DFP_ATPACK)
-	unzip -q -o $(DFP_ATPACK) -d dfp/pic12-16f1xxx
+$(DFP_XC8_DIR): $(DFP_ATPACK)
+	@mkdir -p $(DFPDIR)
+	unzip -q -o $(DFP_ATPACK) -d $(DFPDIR)/pic12-16f1xxx
 
 $(DFP_ATPACK):
-	@mkdir -p dfp
 	curl -fL -o $(DFP_ATPACK) \
 	    "https://packs.download.microchip.com/$(DFP_NAME).$(DFP_VERSION).atpack"
 
 clean:
-	rm -rf $(BUILDDIR) $(DISTDIR)
+	rm -rf $(BUILDDIR)/* $(DISTDIR)/* $(DFPDIR)/*
 
 clobber: clean
