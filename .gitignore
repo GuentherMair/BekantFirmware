@@ -1,2 +1,5 @@
 .DS_Store
 dfp/
+src/build/
+src/dist/
+src/*.d

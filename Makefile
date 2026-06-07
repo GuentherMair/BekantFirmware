@@ -55,6 +55,6 @@ $(DFP_ATPACK):
 	    "https://packs.download.microchip.com/$(DFP_NAME).$(DFP_VERSION).atpack"
 
 clean:
-	rm -rf $(BUILDDIR) $(DISTDIR)
+	rm -rf $(dir $(BUILDDIR)) $(dir $(DISTDIR)) dfp
 
 clobber: clean
