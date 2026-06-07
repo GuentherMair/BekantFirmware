@@ -112,7 +112,7 @@ optimises less than the PRO mode but produces working code.
 
 - Download XC8: <https://www.microchip.com/mplab/compilers>
 
-Confirm installation:
+Confirm installation works (`xc8-cc` should be added to the PATH during installation):
 
 ```sh
 xc8-cc --version

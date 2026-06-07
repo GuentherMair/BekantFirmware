@@ -202,8 +202,8 @@ void btn_timer(void) {
     static INPUT_t last_input = INPUT_IDLE;
 
     ButtonState_t button_state;
-    button_state.UP   = PORTBbits.UP;
-    button_state.DOWN = PORTBbits.DOWN;
+    button_state.UP   = PORTBbits.RB1;  /* RB1 = UP button (PCB trace) */
+    button_state.DOWN = PORTBbits.RB0;  /* RB0 = DOWN button (PCB trace) */
 
     if (btn_debounce(button_state)) {
         INPUT_t input = btn_gesture(button_state);
