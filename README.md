@@ -124,8 +124,8 @@ xc8-cc --version
 make
 ```
 
-The build produces `src/dist/default/bekantfirmware.elf`
-and `src/dist/default/bekantfirmware.hex`.
+The build produces `dist/bekantfirmware.elf`
+and `dist/bekantfirmware.hex`.
 
 ### 3. Open the BEKANT controller
 
@@ -200,20 +200,8 @@ user `iLLiac4` in the following comment
 
 ### 5. Flash the new firmware
 
-In MPLAB X IDE:
-
-1. Make sure the project is the **default** configuration
-   (the toolbar dropdown should say "default").
-2. Click **Make and Program Device** (the down-arrow icon next to
-   the build button, then "Make and Program Device"). The build
-   will run, then the PICkit will program the chip.
-3. Wait for "Programming/Verify complete" in the output window.
-4. Unplug the PICkit.
-
-From the command line with the PICkit 3 standalone tool:
-
 ```sh
-pk3cmd -P PIC16LF1938 -F src/dist/default/production/src.production.hex -M -Y
+pk3cmd -P PIC16LF1938 -F dist/bekantfirmware.hex -M -Y
 ```
 
 ### 6. Restore the EEPROM defaults (optional)
@@ -305,7 +293,7 @@ erasing, you can write the new firmware normally:
 
 ```sh
 pk3cmd -P PIC16LF1938 -E  # erase
-pk3cmd -P PIC16LF1938 -F src/dist/default/production/src.production.hex -M -Y
+pk3cmd -P PIC16LF1938 -F dist/bekantfirmware.hex -M -Y
 ```
 
 ### Reference firmware dump for code-protected units
