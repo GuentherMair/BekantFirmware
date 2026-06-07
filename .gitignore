@@ -2,3 +2,4 @@
 build/
 dfp/
 dist/
+src/*.d
