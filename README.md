@@ -9,6 +9,13 @@ power in case of a malfunction.
 
 **- USE - AT - YOUR - OWN - RISK -**
 
+## TODOs
+
+* get PICkit3 programmer
+* document 'MPLAB X v6.20' (IPE + 8-bit MCUs only) installation
+* document 'ipecmd.jar' usage for creating backups + flashing
+* document 'MPLAB Tools for VS Code' installation and usage
+
 
 # BEKANT Firmware
 
