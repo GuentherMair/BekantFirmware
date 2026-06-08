@@ -1,14 +1,29 @@
 # IMPORTANT
 
-This is as yet mostly untested as I am still waiting for the PIC programmer.
+Analysis of the original OEM firmware (disassembly and rebuild in C) was done
+using the MiniMax-M3 LLM and this result is as yet COMPLETELY untested, while
+I am waiting for the PIC programmer.
+
+If you want to give it a try, clear the path of the desk and be ready to cut
+power in case of a malfunction.
 
 **- USE - AT - YOUR - OWN - RISK -**
 
 
 # BEKANT Firmware
 
-This is a fork-of-fork of the IKEA BEKANT adjustable-height desk
-controller firmware. The original release at
+![Position memory diagram](https://github.com/ivanwick/bekantfirmware/wiki/images/diagram.png)
+
+Control firmware for IKEA BEKANT adjustable-height desk with lower and
+upper memory positions. Can be flashed onto the OEM controller,
+without changing any hardware.
+
+Pre-program a sitting and standing position for your desk and move
+between them with a single button press.
+
+## About this fork
+
+The original release at
 [ivanwick/bekantfirmware](https://github.com/ivanwick/bekantfirmware)
 adds position memory to the OEM controller. The
 [DieSteinhose/bekantfirmware](https://github.com/DieSteinhose/bekantfirmware)
@@ -30,11 +45,9 @@ The rest of the source is mostly identical to the ivanwick project
 
 - **`btn/`** rewritten to support both gesture styles at the same time.
 - **`bekant/bctrl.{c,h}`** now uses the OEM BCMD values recovered
-  from the disassembly (0xfc/0x50/0x49/0xca/0x8b/0x4c/0x0d/0x8e/0xcf)
-  instead of ivanwick's guesses; ivanwick's guesses are mostly
-  wrong, but work in practice because the LIN leg controller is
-  forgiving. See [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md)
-  for the BCMD table.
+  from the disassembly (0xfc/0x50/0x49/0xca/0x8b/0x4c/0x0d/0x8e/0xcf).
+  See [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) for the
+  BCMD table.
 - **`bekant/endstop.{c,h}`** is the recovered endstop / over-travel
   detector (issue #4 fix); it is registered from `user.c::InitApp()`
   and ticked once per scheduler slot from `bctrl_timer()`.
@@ -71,7 +84,6 @@ BekantFirmware/
 │   ├── docs/                           ← STATE_MACHINE / ENCODER_TABLE / FACTORY_RESET
 │   └── disassembly/                    ← orginafirm.hex + .asm dumps
 └── src/
-    ├── README-ORIGINAL.md              ← preserved from ivanwick
     ├── main.c
     ├── configuration_bits.c
     ├── system.c / system.h

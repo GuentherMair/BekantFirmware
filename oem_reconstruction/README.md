@@ -13,12 +13,11 @@ rewrite fits in ~5 KB of code (2,797 words with the endstop fix
 included, vs. ~7,200 words of OEM). The difference is real and
 intentional, not a bug. The original is a **fully-featured 8-state
 control system** with several pieces of OEM-specific behaviour that
-ivanwick did not copy over. Specifically:
+not present in the ivanwick implementation. Specifically:
 
 | OEM feature | Present in ivanwick? | Reconstructed here? |
 |---|---|---|
 | 5-state button SM (combo-press) | yes | yes |
-| Double-tap gesture | no | yes (re-added) |
 | 6-state OEM BCTRL SM (with endstop) | **no** | **yes** |
 | 10-second factory-reset | **no** | **yes** |
 | Endstop / over-travel detector | **no** | **yes** (`endstop.c`) |
@@ -49,7 +48,6 @@ This folder reconstructs all of those regions in C.
 ```
 oem_reconstruction/
 ├── README.md                       ← this file
-├── ANALYSIS.md                     ← disassembly comparison
 ├── main.c                          ← reset vector → startup
 ├── system.c / system.h             ← oscillator / port setup
 ├── user.c / user.h                 ← USART / LIN init
@@ -69,6 +67,7 @@ oem_reconstruction/
 │   ├── eeprom_defaults.c           ← first-boot EEPROM initialisation
 │   └── oem_tables.c                ← recovered retlw / lookup tables
 ├── docs/
+│   ├── ANALYSIS.md                 ← disassembly comparison
 │   ├── STATE_MACHINE.md            ← full 8-state diagram
 │   ├── ENCODER_TABLE.md            ← what the 0x1046+ retlw table encodes
 │   └── FACTORY_RESET.md            ← the 10-second both-buttons-hold sequence
