@@ -12,9 +12,10 @@ power in case of a malfunction.
 ## TODOs
 
 * get PICkit3 programmer
-* document 'MPLAB X v6.20' (IPE + 8-bit MCUs only) installation
-* document 'ipecmd.jar' usage for creating backups + flashing
-* document 'MPLAB Tools for VS Code' installation and usage
+* document flashing using:
+  * [pk2cmd](https://github.com/jaka-fi/pk2cmd)
+  * ipecmd.jar from [MPLAB X v6.20](https://www.microchip.com/en-us/tools-resources/archives/mplab-ecosystem) using IPE + 8-bit MCUs installation only
+* note: the [MPLAB Tools for VS Code](https://onlinedocs.microchip.com/oxy/GUID-5A81D6E3-6746-4021-B894-F920D260854C-en-US-3/index.html) do not support legacy PICkit 3 (they require PICkit 5 or [MPLAB SNAP](https://www.microchip.com/en-us/development-tool/pg164100))
 
 
 # BEKANT Firmware
