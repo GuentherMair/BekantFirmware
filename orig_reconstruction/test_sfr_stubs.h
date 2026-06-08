@@ -1,163 +1,97 @@
-/* Test SFR stubs — only used for gcc -fsyntax-only checks, not for real XC8 builds. */
+/* Test SFR stubs for syntax checking with gcc. */
 #ifndef TEST_SFR_STUBS_H
 #define TEST_SFR_STUBS_H
-
 #include <stdint.h>
 #include <stdbool.h>
-
-/* Use extern declarations; the actual storage is in test_sfr_stubs.c.
- * The XC8 build system normally provides these as addressable memory
- * locations. For a syntax-only test we just need a valid lvalue. */
-
-extern uint8_t _ANSELB;
-extern uint8_t _TRISB;
-extern uint8_t _LATC;
-extern uint8_t _TRISC;
-extern uint8_t _PORTC;
-extern uint8_t _PORTB;
-extern uint8_t _TMR4;
-extern uint8_t _SPBRGL;
-extern uint8_t _SPBRGH;
-extern uint8_t _RCREG;
-extern uint8_t _TXREG;
-extern uint8_t _TRISC6;
-extern uint8_t _TRISC7;
-
-#define ANSELB _ANSELB
-#define TRISB  _TRISB
-#define LATC   _LATC
-#define TRISC  _TRISC
-#define TMR4   _TMR4
-#define SPBRGL _SPBRGL
-#define SPBRGH _SPBRGH
-#define RCREG  _RCREG
-#define TXREG  _TXREG
-
-/* PORTB — used as a struct of bit fields in btn.c. We model it as a
- * single byte plus a union to allow bitfield access. */
-typedef union {
-    struct {
-        unsigned DOWN : 1;
-        unsigned UP   : 1;
-        unsigned      : 6;
-    };
-    uint8_t value;
-} PORTBbits_t;
-
-extern PORTBbits_t _PORTBbits;
-#define PORTB _PORTBbits.value
-#define PORTBbits _PORTBbits
-
-/* PORTC bits */
-typedef union {
-    struct {
-        unsigned      : 6;
-        unsigned TRISC6 : 1;
-        unsigned TRISC7 : 1;
-    };
-    uint8_t value;
-} TRISCbits_t;
-extern TRISCbits_t _TRISCbits;
-#define TRISCbits _TRISCbits
-
-/* Timer2 */
-typedef struct {
-    unsigned T2CKPS  : 2;
-    unsigned TMR2ON  : 1;
-    unsigned T2OUTPS : 4;
-} T2CONbits_t;
-typedef struct {
-    unsigned PR2 : 8;
-} PR2bits_t;
-typedef struct {
-    unsigned TMR2IE : 1;
-    unsigned RCIE   : 1;
-} PIE1bits_t;
-typedef struct {
-    unsigned TMR2IF : 1;
-    unsigned RCIF   : 1;
-    unsigned TXIF   : 1;
-} PIR1bits_t;
-
-extern T2CONbits_t  _T2CONbits;
-extern PR2bits_t    _PR2bits;
-extern PIE1bits_t   _PIE1bits;
-extern PIR1bits_t   _PIR1bits;
-#define T2CONbits _T2CONbits
-#define PR2bits   _PR2bits
-#define PIE1bits  _PIE1bits
-#define PIR1bits  _PIR1bits
-
-/* Timer4 */
-typedef struct {
-    unsigned T4CKPS  : 2;
-    unsigned TMR4ON  : 1;
-    unsigned T4OUTPS : 4;
-} T4CONbits_t;
-typedef struct {
-    unsigned PR4 : 8;
-} PR4bits_t;
-typedef struct {
-    unsigned TMR4IE : 1;
-} PIE3bits_t;
-typedef struct {
-    unsigned TMR4IF : 1;
-} PIR3bits_t;
-
-extern T4CONbits_t  _T4CONbits;
-extern PR4bits_t    _PR4bits;
-extern PIE3bits_t   _PIE3bits;
-extern PIR3bits_t   _PIR3bits;
-#define T4CONbits _T4CONbits
-#define PR4bits   _PR4bits
-#define PIE3bits  _PIE3bits
-#define PIR3bits  _PIR3bits
-
-/* OSCCON */
-typedef struct {
-    unsigned SCS   : 2;
-    unsigned IRCF  : 4;
-} OSCCONbits_t;
-extern OSCCONbits_t _OSCCONbits;
-#define OSCCONbits _OSCCONbits
-
-/* USART */
-typedef struct {
-    unsigned SPEN   : 1;
-    unsigned CREN   : 1;
-    unsigned ADDEN  : 1;
-} RCSTAbits_t;
-typedef struct {
-    unsigned SYNC   : 1;
-    unsigned BRGH   : 1;
-    unsigned SENDB  : 1;
-    unsigned TXEN   : 1;
-} TXSTAbits_t;
-typedef struct {
-    unsigned BRG16  : 1;
-    unsigned WUE    : 1;
-    unsigned ABDEN  : 1;
-    unsigned SCKP   : 1;
-} BAUDCONbits_t;
-
-extern RCSTAbits_t   _RCSTAbits;
-extern TXSTAbits_t   _TXSTAbits;
-extern BAUDCONbits_t _BAUDCONbits;
-#define RCSTAbits   _RCSTAbits
-#define TXSTAbits   _TXSTAbits
-#define BAUDCONbits _BAUDCONbits
-
-/* INTCON */
-typedef struct {
-    unsigned GIE  : 1;
-    unsigned PEIE : 1;
-} INTCONbits_t;
-extern INTCONbits_t _INTCONbits;
-#define INTCONbits _INTCONbits
-
-/* Helper macros */
-#define CLRWDT()              do {} while (0)
-#define __EEPROM_DATA(...)    /* no-op for syntax check */
-#define __eeprom              /* no-op qualifier */
-
+typedef uint8_t uint8;
+typedef int8_t  int8;
+typedef uint16_t uint16;
+typedef int16_t  int16;
+typedef uint32_t uint32;
+typedef int32_t  int32;
+#define _XTAL_FREQ 16000000
+extern uint8_t __ANSELB, __TRISB, __LATC, __TRISC, __PORTC, __PORTB, __TMR4;
+extern uint8_t __SPBRGL, __SPBRGH, __RCREG, __TXREG, __TRISC6, __TRISC7;
+extern uint8_t __EEADR, __EEDATA, __EECON1, __EECON2;
+extern uint8_t __T2CON, __PR2, __PIE1, __PIR1, __T4CON, __PR4, __PIE3, __PIR3;
+extern uint8_t __OSCCON, __RCSTA, __TXSTA, __BAUDCON, __INTCON;
+typedef union { struct { unsigned DOWN:1; unsigned UP:1; unsigned:6; }; uint8_t value; } PORTBbits_t;
+extern PORTBbits_t __PORTBbits;
+typedef union { struct { unsigned:6; unsigned TRISC6:1; unsigned TRISC7:1; }; uint8_t value; } TRISCbits_t;
+extern TRISCbits_t __TRISCbits;
+typedef struct { unsigned T2CKPS:2; unsigned TMR2ON:1; unsigned T2OUTPS:4; } T2CONbits_t;
+typedef struct { uint8_t PR2; } PR2bits_t;
+typedef struct { unsigned TMR2IE:1; unsigned RCIE:1; } PIE1bits_t;
+typedef struct { unsigned TMR2IF:1; unsigned RCIF:1; unsigned TXIF:1; } PIR1bits_t;
+typedef struct { unsigned T4CKPS:2; unsigned TMR4ON:1; unsigned T4OUTPS:4; } T4CONbits_t;
+typedef struct { uint8_t PR4; } PR4bits_t;
+typedef struct { unsigned TMR4IE:1; } PIE3bits_t;
+typedef struct { unsigned TMR4IF:1; } PIR3bits_t;
+typedef struct { unsigned RD:1; unsigned WR:1; unsigned WREN:1; unsigned WRERR:1; unsigned FREE:1; unsigned LWLO:1; unsigned CFGS:1; unsigned EEPGD:1; } EECON1bits_t;
+typedef struct { unsigned SCS:2; unsigned IRCF:4; } OSCCONbits_t;
+typedef struct { unsigned SPEN:1; unsigned CREN:1; unsigned ADDEN:1; } RCSTAbits_t;
+typedef struct { unsigned SYNC:1; unsigned BRGH:1; unsigned SENDB:1; unsigned TXEN:1; } TXSTAbits_t;
+typedef struct { unsigned BRG16:1; unsigned WUE:1; unsigned ABDEN:1; unsigned SCKP:1; } BAUDCONbits_t;
+typedef struct { unsigned GIE:1; unsigned PEIE:1; } INTCONbits_t;
+extern T2CONbits_t __T2CONbits;
+extern PR2bits_t __PR2bits;
+extern PIE1bits_t __PIE1bits;
+extern PIR1bits_t __PIR1bits;
+extern T4CONbits_t __T4CONbits;
+extern PR4bits_t __PR4bits;
+extern PIE3bits_t __PIE3bits;
+extern PIR3bits_t __PIR3bits;
+extern EECON1bits_t __EECON1bits;
+extern OSCCONbits_t __OSCCONbits;
+extern RCSTAbits_t __RCSTAbits;
+extern TXSTAbits_t __TXSTAbits;
+extern BAUDCONbits_t __BAUDCONbits;
+extern INTCONbits_t __INTCONbits;
+#define ANSELB __ANSELB
+#define TRISB  __TRISB
+#define LATC   __LATC
+#define TRISC  __TRISC
+#define TMR4   __TMR4
+#define SPBRGL __SPBRGL
+#define SPBRGH __SPBRGH
+#define RCREG  __RCREG
+#define TXREG  __TXREG
+#define EEADR  __EEADR
+#define EEDATA __EEDATA
+#define EECON1 __EECON1
+#define EECON2 __EECON2
+#define T2CON  __T2CON
+#define PR2    __PR2
+#define PIE1   __PIE1
+#define PIR1   __PIR1
+#define T4CON  __T4CON
+#define PR4    __PR4
+#define PIE3   __PIE3
+#define PIR3   __PIR3
+#define OSCCON __OSCCON
+#define RCSTA  __RCSTA
+#define TXSTA  __TXSTA
+#define BAUDCON __BAUDCON
+#define INTCON __INTCON
+#define PORTB __PORTBbits.value
+#define PORTBbits __PORTBbits
+#define TRISCbits __TRISCbits
+#define T2CONbits __T2CONbits
+#define PR2bits __PR2bits
+#define PIE1bits __PIE1bits
+#define PIR1bits __PIR1bits
+#define T4CONbits __T4CONbits
+#define PR4bits __PR4bits
+#define PIE3bits __PIE3bits
+#define PIR3bits __PIR3bits
+#define EECON1bits __EECON1bits
+#define OSCCONbits __OSCCONbits
+#define RCSTAbits __RCSTAbits
+#define TXSTAbits __TXSTAbits
+#define BAUDCONbits __BAUDCONbits
+#define INTCONbits __INTCONbits
+#define CLRWDT() do {} while (0)
+#define __EEPROM_DATA(...)
+#define __eeprom
+#define NOP() do {} while (0)
 #endif

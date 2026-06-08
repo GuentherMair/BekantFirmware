@@ -22,7 +22,7 @@
 #include "lin/lin_d.h"
 #include "bekant/bctrl.h"
 #include "bekant/bui.h"
-#include "bekant/orig_endstop.h"
+#include "bekant/endstop.h"
 #include "btn/btn.h"
 
 static void InitUsart(void);
@@ -44,7 +44,7 @@ void InitApp(void) {
      * endstop detector to the LIN tick, and the button gestures to bui. */
     lin_frame_finish     = bctrl_rx_lin;
     bctrl_report_pos     = bui_set_pos;
-    orig_endstop_report  = bctrl_stop_if_at_endstop;
+    orig_endstop_report  = bctrl_stop_if_at_endstop_cb;
     btn_report_gesture   = bui_input;
 
     InitUsart();

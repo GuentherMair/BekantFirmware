@@ -2,11 +2,12 @@
  * @file main.c
  * @brief BEKANT controller — recovered startup sequence.
  *
- * Reconstructed from orginafirm.hex (PIC16LF1938). The reset vector at
- * 0x0000 → goto 0x001f → goto 0x0221 → goto 0x0185 → goto 0x0190
- * yields the main loop entry at 0x0190. The function 0x0221 is the
- * init-and-start sequence: it stores four 16-bit constants into EEPROM
- * (the default memory positions) and then falls into the main loop.
+ * Reconstructed from orginafirm.hex (PIC16LF1938). The reset vector
+ * at 0x0000 → goto 0x001f → goto 0x0221 → goto 0x0185 → goto 0x0190
+ * yields the main loop entry at 0x0190. The function 0x0221 is
+ * the init-and-start sequence: it stores four 16-bit constants
+ * into EEPROM (the default memory positions) and then falls into
+ * the main loop.
  *
  * Best-effort reconstruction — see README.md in this folder.
  */
@@ -21,7 +22,8 @@
 #include "bekant/bscan.h"
 #include "bekant/bctrl.h"
 #include "bekant/bui.h"
-#include "bekant/orig_endstop.h"
+#include "bekant/endstop.h"
+#include "bekant/eeprom_defaults.h"
 #include "btn/btn.h"
 
 void main(void) {
@@ -43,6 +45,11 @@ void main(void) {
      * structure but uses different frame IDs. */
     bscan_init();
     bscan_scan();
+
+    /* Initialise the EEPROM with OEM defaults. This is what the
+     * function at 0x0221 in the OEM firmware does — writes the
+     * four 16-bit default positions to EEPROM. */
+    eeprom_init_defaults();
 
     bctrl_init();
     bui_init();

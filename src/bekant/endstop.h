@@ -1,5 +1,5 @@
-#ifndef ORIG_ENDSTOP_H
-#define ORIG_ENDSTOP_H
+#ifndef ENDSTOP_H
+#define ENDSTOP_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -25,7 +25,7 @@ void orig_endstop_timer(void);
 extern void (*orig_endstop_report)(int16_t pos);
 
 /* Convenience: the callback bctrl.c can register to forward its
- * position report to the endstop detector.  Defined in orig_endstop.c. */
+ * position report to the endstop detector.  Defined in endstop.c. */
 void bctrl_stop_if_at_endstop(int16_t pos);
 
 #endif /* ORIG_ENDSTOP_H */

@@ -1,5 +1,5 @@
 /**
- * @file orig_endstop.c
+ * @file endstop.c
  * @brief BEKANT controller — recovered endstop / over-travel detector.
  *
  * Recovered from disassembly addresses 0x05c0–0x068d (the OEM
@@ -41,7 +41,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include "orig_endstop.h"
+#include "endstop.h"
 #include "bctrl.h"
 
 extern int16_t bctrl_pos;

@@ -142,7 +142,7 @@ void btn_init(void) {
      *   prescaler 1:1, period 100, postscaler 1:10 → 4 kHz interrupt
      * Each debounce tick is 250 µs; 200 ticks = 50 ms. */
     T2CONbits.T2CKPS  = 0b00;       // prescaler 1:1
-    PR2bits.PR2       = 100;        // period
+    PR2 = 100;                       // period
     T2CONbits.T2OUTPS = 0b1001;     // postscaler 1:10
     T2CONbits.TMR2ON  = 1;
     PIE1bits.TMR2IE   = 1;

@@ -12,6 +12,7 @@
 #endif
 #include <stdbool.h>
 #include "bctrl.h"
+#include "endstop.h"
 #include "../lin/lin_d.h"
 
 void (*bctrl_report_pos)(int16_t pos);
@@ -78,18 +79,6 @@ LIN_bus_message_t bus_schedule[] = {
 #define SCHEDULE_COMMAND_SLOT 10
 
 #define DECEL_COUNT_MAX 3 // How many decel frames to send
-
-enum {
-    BCMD_AFTER_SCAN_INIT = 0xbf,
-    BCMD_STOP_IDLE = 0xfc,
-    BCMD_PRE_MOVE = 0xc4,
-    BCMD_UP = 0x86,
-    BCMD_DOWN = 0x85,
-    BCMD_DECEL = 0x87,
-    BCMD_PRE_STOP = 0x84,
-    BCMD_ERR_DOWN = 0xbd,
-    BCMD_ERR_UP = 0xbc,
-};
 
 void bctrl_next_state(void) {
     switch (current_state) {
@@ -188,6 +177,14 @@ void bctrl_timer(void) {
         // BUI might call back bctrl_set_target to change target state
         // BCTRL_STOP based on the position
         bctrl_pos = cmd_data.encoder; // encoder val from whatever cmd sent
+
+        // Run the endstop detector before notifying the BUI. If the
+        // desk is stuck (encoder not advancing) while BCTRL is
+        // commanding motion, the endstop detector will transition
+        // the target to BCTRL_STOP via bctrl_set_target() before
+        // bui_set_pos() sees the position.
+        orig_endstop_timer();
+
         bctrl_report_pos(bctrl_pos);
 
         // Finish bus transaction
@@ -221,7 +218,7 @@ void bctrl_populate_cmd() {
     switch (current_state) {
         case BCTRL_AFTER_SCAN:
             cmd_data.encoder = (int16_t)0xfff6;
-            cmd_data.status = BCMD_AFTER_SCAN_INIT;
+            cmd_data.status = BCMD_AFTER_SCAN_INIT;  /* OEM 0x50 */
             break;
 
         case BCTRL_UP_DECEL:
@@ -231,7 +228,7 @@ void bctrl_populate_cmd() {
             }
 
             cmd_data.encoder = decel_target;
-            cmd_data.status = BCMD_DECEL;
+            cmd_data.status = BCMD_DECEL;  /* OEM 0x8e */
             break;
 
         case BCTRL_DOWN_DECEL:
@@ -241,52 +238,50 @@ void bctrl_populate_cmd() {
             }
 
             cmd_data.encoder = decel_target;
-            cmd_data.status = BCMD_DECEL;
+            cmd_data.status = BCMD_DECEL;  /* OEM 0x8e */
             break;
 
         case BCTRL_UP:
             if (error_cond) {
-                // take greater encoder value
+                // take greater encoder value, use slow speed (OEM 0x8b)
                 cmd_data.encoder = encoder_max;
-                cmd_data.status = BCMD_ERR_UP;
+                cmd_data.status = BCMD_UP_SLOW;
             } else {
-                // take lesser encoder value
+                // take lesser encoder value, use fast speed (OEM 0xca)
                 cmd_data.encoder = encoder_min;
-                cmd_data.status = BCMD_UP;
+                cmd_data.status = BCMD_UP_FAST;
             }
             break;
 
         case BCTRL_DOWN:
             if (error_cond) {
-                // encoder zero when OEM_DOWN_SLOW
+                // encoder zero when OEM_DOWN_SLOW (OEM 0x4c)
                 cmd_data.encoder = 0;
-                cmd_data.status = BCMD_ERR_DOWN;
+                cmd_data.status = BCMD_DOWN_SLOW;
             } else {
-                // take greater encoder value
+                // take greater encoder value, use fast speed (OEM 0x0d)
                 cmd_data.encoder = encoder_max;
-                cmd_data.status = BCMD_DOWN;
+                cmd_data.status = BCMD_DOWN_FAST;
             }
             break;
 
         case BCTRL_STOP:
             cmd_data.encoder = encoder_max;
-            cmd_data.status = BCMD_STOP_IDLE;
+            cmd_data.status = BCMD_STOP_IDLE;  /* OEM 0xfc */
             break;
         case BCTRL_PRE_MOVE:
             cmd_data.encoder = encoder_max;
-            cmd_data.status = BCMD_PRE_MOVE;
+            cmd_data.status = BCMD_PRE_MOVE;  /* OEM 0x49 */
             break;
         case BCTRL_PRE_STOP:
             cmd_data.encoder = encoder_max;
-            cmd_data.status = BCMD_PRE_STOP;
+            cmd_data.status = BCMD_PRE_STOP;  /* OEM 0xcf */
             break;
         case BCTRL_CLICK:
-            // Single move command just to click the legs.
-            // One command isn't enough to really move, but it does cause a
-            // click (relay for brakes?)
-            // Either BCMD_UP or BCMD_DOWN status command causes a click
+            // Single move command just to click the legs (relay brake).
+            // OEM uses DOWN_FAST (0x0d) for this.
             cmd_data.encoder = encoder_max;
-            cmd_data.status = BCMD_DOWN;
+            cmd_data.status = BCMD_DOWN_FAST;
             break;
     }
 }

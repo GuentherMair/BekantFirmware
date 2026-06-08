@@ -2,7 +2,7 @@
 
 This is as yet mostly untested as I am still waiting for the PIC programmer.
 
-**USE AT YOUR OWN RISK.**
+**- USE - AT - YOUR - OWN - RISK -**
 
 
 # BEKANT Firmware

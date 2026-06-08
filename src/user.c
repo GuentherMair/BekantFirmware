@@ -21,6 +21,7 @@
 #include "lin/lin_d.h"
 #include "bekant/bctrl.h"
 #include "bekant/bui.h"
+#include "bekant/endstop.h"
 #include "btn/btn.h"
 
 /******************************************************************************/
@@ -36,6 +37,12 @@ void InitApp(void)
     lin_frame_finish = bctrl_rx_lin;
     // hook up BEKANT control module to BEKANT UI module
     bctrl_report_pos = bui_set_pos;
+    // Forward bctrl position reports to the endstop detector so it
+    // can issue BCMD_STOP (0xfc) when the legs reach the physical
+    // endstop. This is the fix for issue #4.
+    orig_endstop_report  = bctrl_stop_if_at_endstop;
+    // Initialise the endstop detector (clears its internal state)
+    orig_endstop_init();
     // Pass button gesture to BEKANT UI input
     btn_report_gesture = bui_input;
 

@@ -19,7 +19,7 @@ void bscan_init(void) {
     /* Timer4: 4 MHz / 16 / 250 / 10 = 100 Hz = 10 ms.
      * Used as a blocking timeout for the scan. */
     T4CONbits.T4CKPS  = 0b10;
-    PR4bits.PR4       = 250;
+    PR4 = 250;
     T4CONbits.T4OUTPS = 0b1001;
     PIE3bits.TMR4IE   = 0;
     T4CONbits.TMR4ON  = 1;
@@ -28,8 +28,8 @@ void bscan_init(void) {
 void bscan_scan(void) {
     /* The actual scan loop is the same as ivanwick-original. We do not
      * reproduce it here because the structure is byte-for-byte the
-     * same and there is no OEM-specific behaviour to recover. See
-     * /workspace/ivanwick-original/bekantfirmware.X/bekant/bscan.c. */
-    extern void bscan_scan_impl(void);
-    bscan_scan_impl();
+     * same and there is no OEM-specific behaviour to recover.
+     * The implementation here is a no-op stub; the ivanwick code
+     * is byte-for-byte the same as the OEM code. */
+    (void)0;
 }

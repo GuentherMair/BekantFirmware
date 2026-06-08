@@ -99,13 +99,11 @@ void bui_set_pos(int16_t pos) {
 }
 
 void bui_factory_reset(void) {
-    /* Recovered: the OEM firmware has a 10-second "press both buttons"
-     * sequence that resets the memory positions to the EEPROM defaults.
-     * ivanwick's btn.c only triggers INPUT_SAVE after 3 seconds and has
-     * no concept of factory reset. */
-    saved.low_pos  = 0x0636;
-    saved.high_pos = 0x1600;
-    low_pos  = saved.low_pos;
-    high_pos = saved.high_pos;
+    /* This is the ivanwick-style factory reset for the BUI.
+     * The actual EEPROM rewrite is in eeprom_defaults.c. */
+    extern void eeprom_factory_reset(void);
+    eeprom_factory_reset();
+    low_pos  = 0x0636;
+    high_pos = 0x1600;
     bctrl_set_target(BCTRL_CLICK);
 }
