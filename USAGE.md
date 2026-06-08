@@ -88,9 +88,16 @@ better. The firmware doesn't care which you pick.
 - Keep the desk's path clear during all movement.
 - Stay near the controller while a memory move is in progress, so
   you can cancel by pressing any button.
-- The firmware drops the relay when the desk reaches the physical
-  endstop, so the motor cannot stall indefinitely.
-- If something goes wrong, cutting power stops the desk immediately.
+- The firmware *is intended to* drop the relay when the desk
+  reaches the physical endstop, so the motor cannot stall
+  indefinitely. (This is implemented in `src/bekant/endstop.c`
+  via a separate endstop-detector module; we believe this
+  fixes the bug described in
+  [ivanwick issue #4](https://github.com/ivanwick/bekantfirmware/issues/4),
+  but the endstop behaviour has not been verified on a real
+  BEKANT controller.)
+- If something goes wrong, cutting power stops the desk
+  immediately.
 
 ## Disclaimer
 

@@ -32,28 +32,35 @@ fork changes the gesture you use to invoke a memory position.
 This project:
 
 1. **Supports both gesture styles at the same time.** You can use
-   the ivanwick "combo-press" (hold one button, tap the other), the
-   DieSteinhose "double-tap", or mix and match. The unified state
-   machine in `btn/btn.c` handles both.
-2. **Includes a best-effort C reconstruction** of the original IKEA
-   firmware in `oem_reconstruction/`, for future
-   reference and to verify the endstop behaviour described in
+   the ivanwick "combo-press" (hold one button, tap the other),
+   the DieSteinhose "double-tap", or mix and match. The unified
+   state machine in `btn/btn.c` *appears* to handle both. (Not
+   yet tested on hardware.)
+2. **Includes a best-effort C reconstruction** of what we
+   believe to be the original IKEA firmware in
+   `oem_reconstruction/`, for future reference and as a
+   *tentative* attempt at the endstop behaviour described in
    [ivanwick issue #4](https://github.com/ivanwick/bekantfirmware/issues/4).
+   See the [Disclaimer](#disclaimer) below — none of this has
+   been verified on a real BEKANT controller.
 
-The rest of the source is mostly identical to the ivanwick project
-(the original release), with these additions / fixes:
+The rest of the source is mostly identical to the ivanwick
+project (the original release), with these additions / fixes:
 
-- **`btn/`** rewritten to support both gesture styles at the same time.
-- **`bekant/bctrl.{c,h}`** now uses the OEM BCMD values recovered
-  from the disassembly (0xfc/0x50/0x49/0xca/0x8b/0x4c/0x0d/0x8e/0xcf).
-  See [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) for the
-  BCMD table.
-- **`bekant/endstop.{c,h}`** is the recovered endstop / over-travel
-  detector (issue #4 fix); it is registered from `user.c::InitApp()`
-  and ticked once per scheduler slot from `bctrl_timer()`.
+- **`btn/`** rewritten to support both gesture styles at the
+  same time.
+- **`bekant/bctrl.{c,h}`** now uses what we believe to be the
+  OEM BCMD values recovered from the disassembly
+  (0xfc/0x50/0x49/0xca/0x8b/0x4c/0x0d/0x8e/0xcf). See
+  [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) for the
+  BCMD table and the caveats around the state mapping.
+- **`bekant/endstop.{c,h}`** is the *proposed* endstop /
+  over-travel detector (a *tentative* fix for issue #4); it is
+  registered from `user.c::InitApp()` and ticked once per
+  scheduler slot from `bctrl_timer()`. Not yet verified.
 - **`interrupts.c`** declares the ISR with the `__interrupt()`
-  qualifier — without it, XC8 free mode dead-strips the function
-  and the interrupt vector stays empty.
+  qualifier — without it, XC8 free mode appears to dead-strip
+  the function and the interrupt vector would stay empty.
 
 ## Quick links
 
@@ -267,11 +274,16 @@ See [USAGE.md](USAGE.md) for the full button reference.
   reversed or a pin is shorted. Inspect the connector and try again.
 - **The desk doesn't move but the controller's lights are on.** The
   bus scan failed. Power-cycle the desk and try again.
-- **The relay stays engaged at the endstop.** The endstop detector
-  is included in the `oem_reconstruction/` folder and is wired into
-  the main build (`src/bekant/endstop.c`, registered in
-  `user.c::InitApp()` and ticked from `bctrl_timer()`). See
-  [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) for the analysis.
+- **The relay stays engaged at the endstop.** This *may* be
+  the same bug as
+  [ivanwick issue #4](https://github.com/ivanwick/bekantfirmware/issues/4)
+  (we have not confirmed). The proposed endstop detector is
+  included in the `oem_reconstruction/` folder and is wired
+  into the main build (`src/bekant/endstop.c`, registered in
+  `user.c::InitApp()` and ticked from `bctrl_timer()`). It has
+  not been verified on a real BEKANT controller. See
+  [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) for the
+  analysis and its caveats.
 
 ## Hardware variants & code protection
 

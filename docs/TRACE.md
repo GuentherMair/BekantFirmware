@@ -142,11 +142,11 @@ only set in the `INPUT_UP` → release transition, not after a memory
 fire). A quick re-tap of `U` is therefore a normal `INPUT_UP`, not
 a spurious second memory move.
 
-This is the edge case that justifies the unified state machine: a
+This is the edge case that motivates the unified state machine: a
 pure DieSteinhose state machine would have armed the double-tap
 window during the first `UP` and then fired a *second* `INPUT_MEM_UP`
-when the user happened to press `U` again within 500 ms. Our state
-machine is smart enough to suppress that.
+when the user happened to press `U` again within 500 ms. The
+unified state machine appears to suppress that.
 
 ## Trace J — interrupt a memory move (cancel by pressing the other button)
 
@@ -158,8 +158,9 @@ events  :             ↑ INPUT_MEM_UP     INPUT_DOWN
 ```
 
 From `MEM_UP`, pressing `D` (with `U` released or held) transitions
-to `DOWN`. This lets the user cancel the memory-up and start moving
-down immediately, matching the ivanwick behaviour.
+to `DOWN`. This is intended to let the user cancel the memory-up
+and start moving down immediately — i.e. the same behaviour as
+in the ivanwick project.
 
 ## Re-running the traces
 

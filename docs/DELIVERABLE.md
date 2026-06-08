@@ -134,10 +134,13 @@ For step-by-step build + flash instructions, see
 [`README.md`](README.md). For the end-user button reference, see
 [`USAGE.md`](USAGE.md).
 
-## How the endstop fix was integrated
+## How the proposed endstop fix was integrated
 
-The recovered endstop detector is wired into the main build via
-three small additions in `src/`:
+The recovered endstop detector has been wired into the main
+build via three small additions in `src/`. (We have not run
+this on hardware; the integration is consistent with the
+disassembly-based analysis in `docs/ENDSTOP_ANALYSIS.md` but is
+not itself verified.)
 
 1. `src/bekant/endstop.c` and `src/bekant/endstop.h` — the
    detector itself, copied from `oem_reconstruction/bekant/`.
@@ -152,26 +155,33 @@ three small additions in `src/`:
    `endstop_timer()` once per scheduler slot, before
    `bctrl_report_pos`.
 
-The OEM BCMD values from the recovered `bcmd_table.c` are also
+The BCMD values from the recovered `bcmd_table.c` are also
 inlined into `src/bekant/bctrl.h`; the build's BCMD_* constants
-match the OEM (0x50/0x49/0xca/0x8b/0x4c/0x0d/0x8e/0xcf/0xfc)
-rather than ivanwick's guesses (0x86/0x85/0x87/0x84/0xc4/0xbf).
-In practice the LIN leg controller is forgiving so ivanwick's
-guesses work too, but the OEM values are the right ones to use.
+appear to match the OEM (0x50/0x49/0xca/0x8b/0x4c/0x0d/0x8e/0xcf/0xfc)
+rather than the ivanwick project's use of
+(0x86/0x85/0x87/0x84/0xc4/0xbf). In practice the LIN leg
+controller may be forgiving enough that the ivanwick values
+also work; we *assume* the OEM values are the right ones to
+use, but we have not tested either set on hardware.
 
-The endstop fix does **not** depend on the BCMD values being
-exact — the fix specifically issues the universal `0xfc` STOP,
-which ivanwick already had right.
+The endstop fix does not appear to depend on the BCMD values
+being exact — the fix specifically issues the universal `0xfc`
+STOP, which ivanwick appears to have had right.
 
 ## Verification status
 
-The combined project builds clean with XC8 v3.10 free mode under
-`make`, producing `dist/bekantfirmware.hex` (15,476 bytes,
-2,797 words of 16,384 used = 17.1%). The disassembly
-(`pic-objdump -d dist/bekantfirmware.elf`) shows the recovered
-endstop detector at `_endstop_timer` (0x0760) and the
-ISR at `_isr` (0x0004) wired to `_lin_txrx_daemon`,
-`_bctrl_timer`, and `_btn_timer` per the PIR bits.
+The combined project compiles without errors with XC8 v3.10 free
+mode under `make`, producing `dist/bekantfirmware.hex`
+(15,476 bytes, 2,797 words of 16,384 used = 17.1%). "Compiles
+clean" is the *only* verification we can claim — the project
+has not been run on a PIC16LF1938 simulator or on hardware.
+
+The disassembly (`pic-objdump -d dist/bekantfirmware.elf`)
+shows the recovered endstop detector at `_endstop_timer`
+(0x0760) and the ISR at `_isr` (0x0004) wired to
+`_lin_txrx_daemon`, `_bctrl_timer`, and `_btn_timer` per the
+PIR bits. The wiring is what we expected from the source, but
+it has not been observed to run.
 
 The `test_sfr_stubs.h` shim is kept for `gcc -fsyntax-only`
 checks; the real build uses the real XC8 headers from the DFP.
@@ -181,15 +191,20 @@ checks; the real build uses the real XC8 headers from the DFP.
 - **No PIC simulation or hardware test.** A real run on a
   PIC16LF1938 simulator or actual hardware is the final
   validation step. The endstop detector was hand-translated
-  from the disassembly, so the threshold and behavior should
-  be re-verified once a unit is available.
-- **The reconstruction's btn.c is a simplified version.** The full
-  8-state OEM firmware state machine at disassembly 0x05c0 is much
-  more elaborate than ivanwick's; we kept the simplified version
-  because the extra states are for the 10-second factory-reset
-  sequence, which is a separate (downstream) feature.
+  from the disassembly, so the threshold and behaviour should
+  be re-verified once a unit is available. Until then, the
+  *whole pipeline* — disassembly interpretation, BCMD values,
+  state machine, endstop detector, integration — is
+  unverified inference.
+- **The reconstruction's btn.c is a simplified version.** The
+  full 8-state OEM firmware state machine at disassembly
+  0x05c0 appears to be much more elaborate than ivanwick's;
+  we kept the simplified version because the extra states are
+  for the 10-second factory-reset sequence, which is a
+  separate (downstream) feature.
 - **Factory-reset is not wired into `btn/btn.c`.** The recovered
   `bui_factory_reset()` lives in `oem_reconstruction/bekant/`
   but is not connected to the unified button state machine. The
-  endstop fix and the factory-reset are independent features,
-  and the endstop fix is the higher-priority one.
+  endstop fix and the factory-reset appear to be independent
+  features; we focused on the endstop fix because it directly
+  addresses issue #4.
