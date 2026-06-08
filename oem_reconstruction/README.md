@@ -47,7 +47,7 @@ This folder reconstructs all of those regions in C.
 ## Layout
 
 ```
-orig_reconstruction/
+oem_reconstruction/
 ├── README.md                       ← this file
 ├── ANALYSIS.md                     ← disassembly comparison
 ├── main.c                          ← reset vector → startup

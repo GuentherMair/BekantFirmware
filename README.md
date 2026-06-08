@@ -21,7 +21,7 @@ This project:
    DieSteinhose "double-tap", or mix and match. The unified state
    machine in `btn/btn.c` handles both.
 2. **Includes a best-effort C reconstruction** of the original IKEA
-   firmware in `orig_reconstruction/`, for future
+   firmware in `oem_reconstruction/`, for future
    reference and to verify the endstop behaviour described in
    [ivanwick issue #4](https://github.com/ivanwick/bekantfirmware/issues/4).
 
@@ -48,7 +48,7 @@ The rest of the source is mostly identical to the ivanwick project
 - **[docs/COMPARISON.md](docs/COMPARISON.md)** — how the two upstreams differ and how this project handles both
 - **[docs/TRACE.md](docs/TRACE.md)** — state-machine traces you can audit by hand
 - **[docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md)** — endstop / over-travel analysis (issue #4)
-- **[orig_reconstruction/](orig_reconstruction/)** — reconstructed C code of the original IKEA firmware, with the disassembly
+- **[oem_reconstruction/](oem_reconstruction/)** — reconstructed C code of the original IKEA firmware, with the disassembly
 
 ## Project layout
 
@@ -61,7 +61,7 @@ BekantFirmware/
 │   ├── DELIVERABLE.md
 │   ├── ENDSTOP_ANALYSIS.md
 │   └── TRACE.md
-├── orig_reconstruction/                ← reverse-engineered reference impl
+├── oem_reconstruction/                ← reverse-engineered reference impl
 │   ├── README.md
 │   ├── ANALYSIS.md
 │   ├── main.c / system.c / user.c / interrupts.c / configuration_bits.c
@@ -256,7 +256,7 @@ See [USAGE.md](USAGE.md) for the full button reference.
 - **The desk doesn't move but the controller's lights are on.** The
   bus scan failed. Power-cycle the desk and try again.
 - **The relay stays engaged at the endstop.** The endstop detector
-  is included in the `orig_reconstruction/` folder and is wired into
+  is included in the `oem_reconstruction/` folder and is wired into
   the main build (`src/bekant/endstop.c`, registered in
   `user.c::InitApp()` and ticked from `bctrl_timer()`). See
   [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) for the analysis.
@@ -322,7 +322,7 @@ back, the ivanwick project bundles a reference dump
 ([`orginafirm.hex.zip`](https://github.com/ivanwick/bekantfirmware/files/7874509/orginafirm.hex.zip))
 that you can flash to restore factory behaviour. This dump is
 bundled with this project too — see
-`orig_reconstruction/disassembly/orginafirm.hex`.
+`oem_reconstruction/disassembly/orginafirm.hex`.
 
 **Caveats:**
 

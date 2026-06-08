@@ -9,12 +9,12 @@ stays engaged instead of being released. The root cause is a missing
 module — the ivanwick project has no equivalent of the original IKEA
 firmware's endstop detector. The fix is a small, self-contained
 module (see `src/bekant/endstop.c`, recovered from
-`orig_reconstruction/bekant/endstop.c`)
+`oem_reconstruction/bekant/endstop.c`)
 that watches the leg encoders and forces BCMD_STOP (0xfc) when motion
 is commanded but the encoder has stopped advancing.
 
 The reconstructed C code, the disassembly, and the analysis below are
-kept under `orig_reconstruction/` for future
+kept under `oem_reconstruction/` for future
 reference.
 
 ## What issue #4 actually says
@@ -71,7 +71,7 @@ magic byte), the state transitions to `0x02` and the firmware
 treats the next 10-second hold as a reset. The value `0x55` is
 presumably loaded into `0x4c` by a different code path that
 counts how long both buttons have been held; the recovery of that
-counter is in `orig_reconstruction/bekant/bui.c::bui_factory_reset()`.
+counter is in `oem_reconstruction/bekant/bui.c::bui_factory_reset()`.
 
 The ivanwick project **does not have this state machine**. The
 closest equivalent in `bekant/bctrl.c` is the `bctrl_set_target`
@@ -151,7 +151,7 @@ leg to move, and the relay stays on. **This is the bug.**
 
 ## The fix
 
-`orig_reconstruction/bekant/endstop.c` is a
+`oem_reconstruction/bekant/endstop.c` is a
 ~150-line module that:
 
 1. Watches the leg encoder (via `bctrl_report_pos`, which the
@@ -182,7 +182,7 @@ Three small additions to a stock ivanwick project would close
 issue #4:
 
 1. Add `bekant/endstop.c` and `bekant/endstop.h` to the project
-   (copy from `orig_reconstruction/bekant/`).
+   (copy from `oem_reconstruction/bekant/`).
 2. Add `endstop_init()` to `main.c` (or `user.c::InitApp()`).
 3. Add the line `endstop_report = bctrl_stop_if_at_endstop;`
    to `user.c::InitApp()` (same pattern as
@@ -203,7 +203,7 @@ recovered. It lives in the same state machine (disassembly
 **0x05c0–0x068d**), with the magic-byte check at **0x05d8**.
 
 The reconstructed code in
-`orig_reconstruction/bekant/bui.c::bui_factory_reset()`
+`oem_reconstruction/bekant/bui.c::bui_factory_reset()`
 implements the reset, but it is **not** wired up to the button
 state machine in this reconstruction. A full implementation
 would extend `btn/btn.c` with a second SAVE_HOLD_THRESHOLD of 200
@@ -345,7 +345,7 @@ original IKEA firmware has. The fix is a small (~150 line)
 self-contained module that watches the encoder and forces a STOP
 when motion is commanded but no progress is being made. The
 fix is in `src/bekant/endstop.c` (recovered from
-`orig_reconstruction/bekant/endstop.c`)
+`oem_reconstruction/bekant/endstop.c`)
 and integrates with the existing ivanwick project via a single
 line in `user.c::InitApp()` plus one tick call in `bctrl_timer()`.
 

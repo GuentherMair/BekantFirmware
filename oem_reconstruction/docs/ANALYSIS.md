@@ -2,7 +2,7 @@
 
 This document explains the size gap between our current build
 (`dist/bekantfirmware.hex`, 15,476 bytes) and the original OEM hex
-(`orig_reconstruction/disassembly/orginafirm.hex`, 93,697 bytes) and
+(`oem_reconstruction/disassembly/orginafirm.hex`, 93,697 bytes) and
 catalogs what is missing.
 
 ## Raw numbers

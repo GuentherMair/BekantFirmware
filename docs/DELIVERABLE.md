@@ -6,7 +6,7 @@ This deliverable contains:
    gesture variants (ivanwick combo-press and DieSteinhose
    double-tap) **in parallel** from a single build.
 2. A **best-effort C reconstruction** of the original IKEA firmware
-   (from `orginafirm.hex`) inside `orig_reconstruction/`.
+   (from `orginafirm.hex`) inside `oem_reconstruction/`.
 3. An **endstop / over-travel analysis** that explains the root
    cause of [ivanwick/bekantfirmware issue #4](https://github.com/ivanwick/bekantfirmware/issues/4)
    and proposes a fix.
@@ -18,9 +18,9 @@ This deliverable contains:
 - [`docs/COMPARISON.md`](docs/COMPARISON.md) — ivanwick vs DieSteinhose
 - [`docs/TRACE.md`](docs/TRACE.md) — state-machine traces
 - [`docs/ENDSTOP_ANALYSIS.md`](docs/ENDSTOP_ANALYSIS.md) — endstop bug analysis
-- [`orig_reconstruction/`](orig_reconstruction/) —
+- [`oem_reconstruction/`](oem_reconstruction/) —
   reconstructed C code of the original IKEA firmware
-- [`orig_reconstruction/disassembly/`](orig_reconstruction/disassembly/) —
+- [`oem_reconstruction/disassembly/`](oem_reconstruction/disassembly/) —
   the disassembly files (`.hex` and two `.asm` variants) for reference
 
 ## Tree
@@ -34,7 +34,7 @@ BekantFirmware/
 │   ├── DELIVERABLE.md                              ← this file
 │   ├── ENDSTOP_ANALYSIS.md
 │   └── TRACE.md
-├── orig_reconstruction/                            ← best-effort C reconstruction
+├── oem_reconstruction/                            ← best-effort C reconstruction
 │   ├── README.md
 │   ├── ANALYSIS.md
 │   ├── main.c
@@ -140,7 +140,7 @@ The recovered endstop detector is wired into the main build via
 three small additions in `src/`:
 
 1. `src/bekant/endstop.c` and `src/bekant/endstop.h` — the
-   detector itself, copied from `orig_reconstruction/bekant/`.
+   detector itself, copied from `oem_reconstruction/bekant/`.
 2. `src/user.c::InitApp()` — registers the endstop callback:
    ```c
    endstop_report = bctrl_stop_if_at_endstop;
@@ -189,7 +189,7 @@ checks; the real build uses the real XC8 headers from the DFP.
   because the extra states are for the 10-second factory-reset
   sequence, which is a separate (downstream) feature.
 - **Factory-reset is not wired into `btn/btn.c`.** The recovered
-  `bui_factory_reset()` lives in `orig_reconstruction/bekant/`
+  `bui_factory_reset()` lives in `oem_reconstruction/bekant/`
   but is not connected to the unified button state machine. The
   endstop fix and the factory-reset are independent features,
   and the endstop fix is the higher-priority one.
