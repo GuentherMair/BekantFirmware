@@ -1,7 +1,7 @@
 # Disassembly comparison: current build vs original OEM
 
 This document explains the size gap between our current build
-(`dist/bekantfirmware.hex`, 5,428 bytes) and the original OEM hex
+(`dist/bekantfirmware.hex`, 15,476 bytes) and the original OEM hex
 (`orig_reconstruction/disassembly/orginafirm.hex`, 93,697 bytes) and
 catalogs what is missing.
 
@@ -9,14 +9,17 @@ catalogs what is missing.
 
 | Hex file                                     | Size (bytes) | Code range      | Words of code |
 |----------------------------------------------|--------------|-----------------|---------------|
-| `dist/bekantfirmware.hex` (current)          | 5,428        | 0x0000 – 0x07BB | ~1,940        |
+| `dist/bekantfirmware.hex` (current)          | 15,476       | 0x0000 – 0x0F95 | ~2,797        |
 | `orginafirm.hex` (original)                  | 93,697       | 0x0000 – 0x3BE2 | ~7,200        |
 | of which 0x8000–0x8008 (config words)        |              |                 | 6             |
 | of which 0xF000–0xF0FF (EEPROM)              |              |                 | 256           |
 
 The current build is a fork of ivanwick, which is itself a
 simplification of the OEM firmware. ivanwick's code lives in the
-range **0x0000–0x07BB** (≈ 1,940 words ≈ 3,880 bytes of flash).
+range **0x0000–0x07FF** (≈ 2,000 words ≈ 4,000 bytes of flash);
+with the recovered endstop detector wired in (via
+`src/bekant/endstop.c`) the build extends to **0x0F95** (≈ 2,797
+words ≈ 5,594 bytes of flash).
 
 The original OEM firmware fills the full 16 Kword flash with code
 in two non-contiguous regions:
@@ -33,12 +36,14 @@ on PIC16, so it shows as `3fff movwi -.1[1]` in the disassembly).
 ## What the new build contains
 
 `pic-objdump -d dist/bekantfirmware.elf` shows the new build has
-22 separate `text*` psects, all in the 0x0000–0x07BB range. The
-symbol table lists these functions (and their start addresses):
+roughly 30 separate `text*` psects, all in the 0x0000–0x0F95
+range. The symbol table lists these functions (and their start
+addresses):
 
 | Address | Function                                | Source file          |
 |---------|-----------------------------------------|----------------------|
 | 0x0002  | `start` (reset vector)                  | XC8 runtime          |
+| 0x0004  | `isr` (interrupt vector)                | `interrupts.c`       |
 | 0x0439  | `lin_reset_usart`                       | `lin/lin_d.c`        |
 | 0x043E  | `lin_init_hw`                           | `lin/lin_d.c`        |
 | 0x0444  | `lin_tx_frame` / `lin_txrx_blocking`    | `lin/lin_d.c`        |
@@ -57,10 +62,16 @@ symbol table lists these functions (and their start addresses):
 | 0x063D  | `bui_save_pos`                          | `bekant/bui.c`       |
 | 0x0679  | `bui_init`                              | `bekant/bui.c`       |
 | 0x0717  | `btn_timer` / `btn_gesture`             | `btn/btn.c`          |
+| 0x0760  | `endstop_timer`                         | `bekant/endstop.c`   |
+| 0x0D2D  | `endstop_init`                          | `bekant/endstop.c`   |
 
 So the current build is essentially ivanwick + the dual-gesture
-button improvement. The code map is roughly 1:1 to ivanwick's
-original layout, which fits in the lower 2 KB of flash.
+button improvement + the recovered endstop detector. The
+endstop detector adds ~250 words of code (the `_endstop_*`
+and `bctrl_is_moving`/`max`/`min` helpers). The ISR is at
+0x0004 thanks to the `__interrupt()` qualifier in
+`interrupts.c` — without it, XC8 free mode dead-strips the
+function and the interrupt vector stays empty.
 
 ## What the original OEM hex contains that ours does not
 
@@ -179,6 +190,6 @@ one **does** match. The bug in
 [issue #4](https://github.com/ivanwick/bekantfirmware/issues/4)
 is therefore **not** a BCMD bug; it is a missing endstop detector
 that watches the encoder. The reconstructed `endstop.c` in
-`../orig_reconstruction/bekant/orig_endstop.c` is the fix, and
-the equivalent logic is present in the OEM firmware at
-0x0672–0x068D.
+`./bekant/endstop.c` is the fix (also copied into `src/bekant/endstop.c`
+where it is wired into the main build), and the equivalent logic is
+present in the OEM firmware at 0x0672–0x068D.

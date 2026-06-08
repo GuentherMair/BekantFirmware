@@ -17,12 +17,12 @@
  * — see docs/ENDSTOP_ANALYSIS.md for the root-cause analysis.
  */
 
-void orig_endstop_init(void);
-void orig_endstop_timer(void);
+void endstop_init(void);
+void endstop_timer(void);
 
 /* Called by bctrl.c every time the leg positions are reported. The
  * detector decides whether to force a stop. */
-extern void (*orig_endstop_report)(int16_t pos);
+extern void (*endstop_report)(int16_t pos);
 
 /* Convenience: the callback bctrl.c can register to forward its
  * position report to the endstop detector.  Defined in endstop.c. */

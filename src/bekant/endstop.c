@@ -71,13 +71,13 @@ static uint8_t stuck_count     = 0;
 #define ENC_PHYS_HIGH_MAX     0x1f00   /* physical upper endstop region */
 
 /* The BCTRL module registers this so we can demand a stop. */
-void (*orig_endstop_report)(int16_t pos);
+void (*endstop_report)(int16_t pos);
 
 /* Init: read the default memory positions from EEPROM (the same ones
  * ivanwick reads from offsets 0x00 and 0x02 in EEPROM). The OEM
  * firmware uses 4 EEPROM cells (two per leg) but for the endstop
  * detection we only need the global lower/upper bound. */
-void orig_endstop_init(void) {
+void endstop_init(void) {
     prev_encoder  = 0;
     prev_encoder2 = 0;
     stuck_count   = 0;
@@ -111,7 +111,7 @@ static bool bctrl_is_moving(void) {
     return (current_state == BCTRL_UP || current_state == BCTRL_DOWN);
 }
 
-void orig_endstop_timer(void) {
+void endstop_timer(void) {
     int16_t cur = bctrl_pos;
 
     if (bctrl_is_moving()) {
@@ -139,5 +139,5 @@ void orig_endstop_timer(void) {
  * reported. We forward to the timer. */
 void bctrl_stop_if_at_endstop(int16_t pos) {
     (void)pos;
-    orig_endstop_timer();
+    endstop_timer();
 }

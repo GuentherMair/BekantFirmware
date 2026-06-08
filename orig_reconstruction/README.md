@@ -1,38 +1,38 @@
 # OEM BEKANT firmware — full C reconstruction
 
-This folder is a **best-effort reverse-engineered C reconstruction** of the
-IKEA BEKANT controller firmware in `orginafirm.hex`. It goes beyond
-`../orig_reconstruction/` (which was a thin pass that mostly mirrored
-ivanwick) and attempts to **recover the actual OEM source code** for
-the ~6 KB of code (0x1000-0x1FFF and 0x3800-0x3FFF) that is missing
-from the previous reconstruction.
+This folder is a **best-effort reverse-engineered C reconstruction** of
+the IKEA BEKANT controller firmware in `orginafirm.hex`. The code
+in this folder attempts to **recover the actual OEM source code**
+for the ~6 KB of code (0x1000-0x1FFF and 0x3800-0x3FFF) that
+ivanwick did not implement.
 
-## Why the previous reconstruction is so much smaller
+## Why the OEM firmware is so much larger than ivanwick
 
-The previous `../orig_reconstruction/` produces a 5 KB `.hex` while the
-original OEM `.hex` is 94 KB. The difference is real and intentional,
-not a bug. The original is a **fully-featured 8-state control system**
-with several pieces of OEM-specific behaviour that ivanwick did not
-copy over. Specifically:
+The original `orginafirm.hex` is 94 KB while ivanwick's
+rewrite fits in ~5 KB of code (2,797 words with the endstop fix
+included, vs. ~7,200 words of OEM). The difference is real and
+intentional, not a bug. The original is a **fully-featured 8-state
+control system** with several pieces of OEM-specific behaviour that
+ivanwick did not copy over. Specifically:
 
-| OEM feature | Present in ivanwick? | Present in `../orig_reconstruction/`? | Reconstructed here? |
-|---|---|---|---|
-| 5-state button SM (combo-press) | yes | yes (from ivanwick) | yes |
-| Double-tap gesture | no | yes (re-added) | yes |
-| 6-state OEM BCTRL SM (with endstop) | **no** | simplified to 5-state | **yes** |
-| 10-second factory-reset | **no** | not wired | **yes** |
-| Endstop / over-travel detector | **no** | recovered in `orig_endstop.c` | **yes** |
-| EEPROM defaults write-on-first-boot | **no** | partial | **partial** |
-| BCMD lookup table (state → BCMD byte) | guesses | recovered | **yes** |
-| 34-entry BCMD dispatch (state 0-34) | **no** | no | **yes** |
-| 32-entry LIN bus dispatch (state 0-31) | **no** | no | **yes** |
-| Full LIN bus schedule (slot 0..20) | partial | yes | yes |
-| LIN retry on `0x10` ID | yes | yes | yes |
-| BUI position memory (3-byte EEPROM) | yes | yes | yes |
-| Anti-collision/over-current detection | **no** | no | **partial** |
-| Real-time scheduling (40 ms tick) | yes | yes | yes |
-| Two-speed move (fast / slow) | **no** | no | **partial** |
-| Encoder change detector (sample-and-compare) | **no** | no | **yes** |
+| OEM feature | Present in ivanwick? | Reconstructed here? |
+|---|---|---|
+| 5-state button SM (combo-press) | yes | yes |
+| Double-tap gesture | no | yes (re-added) |
+| 6-state OEM BCTRL SM (with endstop) | **no** | **yes** |
+| 10-second factory-reset | **no** | **yes** |
+| Endstop / over-travel detector | **no** | **yes** (`endstop.c`) |
+| EEPROM defaults write-on-first-boot | **no** | **partial** (`eeprom_defaults.c`) |
+| BCMD lookup table (state → BCMD byte) | guesses | **yes** (`bcmd_table.c`) |
+| 34-entry BCMD dispatch (state 0-34) | **no** | **yes** |
+| 32-entry LIN bus dispatch (state 0-31) | **no** | **yes** |
+| Full LIN bus schedule (slot 0..20) | partial | yes |
+| LIN retry on `0x10` ID | yes | yes |
+| BUI position memory (3-byte EEPROM) | yes | yes |
+| Anti-collision/over-current detection | **no** | **partial** |
+| Real-time scheduling (40 ms tick) | yes | yes |
+| Two-speed move (fast / slow) | **no** | **partial** |
+| Encoder change detector (sample-and-compare) | **no** | **yes** |
 
 The OEM firmware has roughly **1.5× more code** than ivanwick's
 rewrite, mostly concentrated in three regions of flash:
@@ -47,7 +47,7 @@ This folder reconstructs all of those regions in C.
 ## Layout
 
 ```
-orig_reconstruction_full/
+orig_reconstruction/
 ├── README.md                       ← this file
 ├── ANALYSIS.md                     ← disassembly comparison
 ├── main.c                          ← reset vector → startup
@@ -97,8 +97,7 @@ orig_reconstruction_full/
 | 0x3800–0x3BFF     | Interrupt-driven 50 ms scheduler                 | `bctrl.c` (`bctrl_timer`) |
 | 0xF000–0xF0FF     | EEPROM data (256 bytes)                          | `eeprom_defaults.c`    |
 
-Bolded rows are the parts that are **not** present in ivanwick and were
-**not** present in the simplified `../orig_reconstruction/`.
+Bolded rows are the parts that are **not** present in ivanwick.
 
 ## How the reconstruction was done
 
@@ -151,5 +150,6 @@ Bolded rows are the parts that are **not** present in ivanwick and were
 
 This folder is intended for **read-only reference** and disassembly
 comparison. To actually build a working firmware, use the
-`../src/` (or `../orig_reconstruction/`) tree, which has the
-ivanwick-style code that is known to work in practice.
+`../src/` tree, which has the ivanwick-style code with the OEM
+BCMD values and the integrated endstop detector. The `src/` tree
+is the one that produces a real `.hex` with `make`.

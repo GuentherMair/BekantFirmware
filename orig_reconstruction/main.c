@@ -53,7 +53,7 @@ void main(void) {
 
     bctrl_init();
     bui_init();
-    orig_endstop_init();
+    endstop_init();
     btn_init();
 
     while (1) {

@@ -31,20 +31,20 @@ void InitApp(void) {
     /* OEM firmware order, recovered from the call chain at 0x0021:
      *   bctrl_init()      — set up Timer4 (LIN scheduler tick)
      *   bui_init()        — load memory positions from EEPROM
-     *   orig_endstop_init — install the endstop detector
+     *   endstop_init      — install the endstop detector
      *   btn_init()        — set up Timer2 + GPIO for buttons
      *   InitUsart()       — EUSART for LIN
      */
     bctrl_init();
     bui_init();
-    orig_endstop_init();
+    endstop_init();
     btn_init();
 
     /* Hook the LIN driver to bctrl, the position reports to bui, the
      * endstop detector to the LIN tick, and the button gestures to bui. */
     lin_frame_finish     = bctrl_rx_lin;
     bctrl_report_pos     = bui_set_pos;
-    orig_endstop_report  = bctrl_stop_if_at_endstop_cb;
+    endstop_report       = bctrl_stop_if_at_endstop_cb;
     btn_report_gesture   = bui_input;
 
     InitUsart();

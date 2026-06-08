@@ -183,7 +183,7 @@ void bctrl_timer(void) {
         // commanding motion, the endstop detector will transition
         // the target to BCTRL_STOP via bctrl_set_target() before
         // bui_set_pos() sees the position.
-        orig_endstop_timer();
+        endstop_timer();
 
         bctrl_report_pos(bctrl_pos);
 

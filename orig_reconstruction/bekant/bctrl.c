@@ -231,7 +231,7 @@ void bctrl_stop_if_at_endstop(void) {
 }
 
 /**
- * Callback used by endstop.c — registered as `orig_endstop_report`
+ * Callback used by endstop.c — registered as `endstop_report`
  * by the user.c / InitApp code. This is the C bridge between the
  * endstop detector and the BCTRL state machine.
  */

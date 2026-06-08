@@ -25,9 +25,22 @@ This project:
    reference and to verify the endstop behaviour described in
    [ivanwick issue #4](https://github.com/ivanwick/bekantfirmware/issues/4).
 
-The rest of the source is byte-for-byte identical to the ivanwick
-project (the original release); only the `btn/` module has been
-touched.
+The rest of the source is mostly identical to the ivanwick project
+(the original release), with these additions / fixes:
+
+- **`btn/`** rewritten to support both gesture styles at the same time.
+- **`bekant/bctrl.{c,h}`** now uses the OEM BCMD values recovered
+  from the disassembly (0xfc/0x50/0x49/0xca/0x8b/0x4c/0x0d/0x8e/0xcf)
+  instead of ivanwick's guesses; ivanwick's guesses are mostly
+  wrong, but work in practice because the LIN leg controller is
+  forgiving. See [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md)
+  for the BCMD table.
+- **`bekant/endstop.{c,h}`** is the recovered endstop / over-travel
+  detector (issue #4 fix); it is registered from `user.c::InitApp()`
+  and ticked once per scheduler slot from `bctrl_timer()`.
+- **`interrupts.c`** declares the ISR with the `__interrupt()`
+  qualifier — without it, XC8 free mode dead-strips the function
+  and the interrupt vector stays empty.
 
 ## Quick links
 
@@ -40,7 +53,7 @@ touched.
 ## Project layout
 
 ```
-bekant-compound/
+BekantFirmware/
 ├── README.md
 ├── USAGE.md
 ├── docs/
@@ -50,9 +63,12 @@ bekant-compound/
 │   └── TRACE.md
 ├── orig_reconstruction/                ← reverse-engineered reference impl
 │   ├── README.md
+│   ├── ANALYSIS.md
 │   ├── main.c / system.c / user.c / interrupts.c / configuration_bits.c
 │   ├── btn/ lin/ bekant/
-│   ├── bekant/orig_endstop.c           ← recovered endstop detector
+│   ├── bekant/endstop.c                ← recovered endstop detector
+│   ├── bekant/bcmd_table.c / bcmd_table.h / oem_tables.c
+│   ├── docs/                           ← STATE_MACHINE / ENCODER_TABLE / FACTORY_RESET
 │   └── disassembly/                    ← orginafirm.hex + .asm dumps
 └── src/
     ├── README-ORIGINAL.md              ← preserved from ivanwick
@@ -60,14 +76,16 @@ bekant-compound/
     ├── configuration_bits.c
     ├── system.c / system.h
     ├── user.c / user.h
-    ├── interrupts.c
+    ├── interrupts.c                    ← void __interrupt() isr(void) (the ISR fix)
+    ├── Makefile
     ├── btn/btn.h                        ← INPUT_t enum, gesture documentation
     ├── btn/btn.c                        ← unified state machine (both gestures)
     ├── lin/lin_d.c / lin_d.h            ← LIN driver
     ├── bekant/bscan.c / bscan.h         ← startup bus scan
-    ├── bekant/bctrl.c / bctrl.h         ← LIN control plane
+    ├── bekant/bctrl.c / bctrl.h         ← LIN control plane (now uses OEM BCMD values)
     ├── bekant/bui.c / bui.h             ← upper-level UI
-    └── test_sfr_stubs.h / .c            ← syntax-check shim (no real XC8)
+    ├── bekant/endstop.c / endstop.h     ← recovered endstop detector, wired in
+    └── test_sfr_stubs.h / .c            ← syntax-only shim (real build uses src/ directly)
 ```
 
 ## Building and uploading
@@ -238,9 +256,10 @@ See [USAGE.md](USAGE.md) for the full button reference.
 - **The desk doesn't move but the controller's lights are on.** The
   bus scan failed. Power-cycle the desk and try again.
 - **The relay stays engaged at the endstop.** The endstop detector
-  is included in the `orig_reconstruction/` folder but is not yet
-  wired into the main build. See
-  [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) for the fix.
+  is included in the `orig_reconstruction/` folder and is wired into
+  the main build (`src/bekant/endstop.c`, registered in
+  `user.c::InitApp()` and ticked from `bctrl_timer()`). See
+  [docs/ENDSTOP_ANALYSIS.md](docs/ENDSTOP_ANALYSIS.md) for the analysis.
 
 ## Hardware variants & code protection
 

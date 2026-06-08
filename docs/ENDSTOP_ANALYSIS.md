@@ -8,7 +8,8 @@ the desk is commanded to its physical bottom (or top), the relay
 stays engaged instead of being released. The root cause is a missing
 module — the ivanwick project has no equivalent of the original IKEA
 firmware's endstop detector. The fix is a small, self-contained
-module (see `orig_reconstruction/bekant/orig_endstop.c`)
+module (see `src/bekant/endstop.c`, recovered from
+`orig_reconstruction/bekant/endstop.c`)
 that watches the leg encoders and forces BCMD_STOP (0xfc) when motion
 is commanded but the encoder has stopped advancing.
 
@@ -150,7 +151,7 @@ leg to move, and the relay stays on. **This is the bug.**
 
 ## The fix
 
-`orig_reconstruction/bekant/orig_endstop.c` is a
+`orig_reconstruction/bekant/endstop.c` is a
 ~150-line module that:
 
 1. Watches the leg encoder (via `bctrl_report_pos`, which the
@@ -163,24 +164,36 @@ leg to move, and the relay stays on. **This is the bug.**
    (0xfc) to be sent and the relay to release.
 
 The module hooks into the same `bctrl_report_pos` callback that
-`bui_set_pos` already uses, so the integration is one line in
-`user.c`:
+`bui_set_pos` already uses, so the integration is two lines in
+`user.c::InitApp()` and one tick call in `bctrl_timer()`:
 
 ```c
-orig_endstop_report = bctrl_stop_if_at_endstop;
+// src/user.c::InitApp()
+endstop_report = bctrl_stop_if_at_endstop;
+endstop_init();
+
+// src/bekant/bctrl.c::bctrl_timer() — once per scheduler slot
+endstop_timer();
 ```
 
 ## Applying the fix to the ivanwick project
 
-Three small additions to the ivanwick project would close issue #4:
+Three small additions to a stock ivanwick project would close
+issue #4:
 
-1. Add `bekant/orig_endstop.c` and `bekant/orig_endstop.h` to the
-   project (copy from `orig_reconstruction/bekant/`).
-2. Add `orig_endstop_init()` to `main.c`.
-3. Add the line `orig_endstop_report = bctrl_stop_if_at_endstop;`
-   to `user.c::InitApp()`.
+1. Add `bekant/endstop.c` and `bekant/endstop.h` to the project
+   (copy from `orig_reconstruction/bekant/`).
+2. Add `endstop_init()` to `main.c` (or `user.c::InitApp()`).
+3. Add the line `endstop_report = bctrl_stop_if_at_endstop;`
+   to `user.c::InitApp()` (same pattern as
+   `bctrl_report_pos = bui_set_pos`).
+4. Add one call to `endstop_timer()` in
+   `bctrl.c::bctrl_timer()`, before the position report.
 
-None of the ivanwick project's existing files need to be modified.
+In this project the integration is already done: the file
+lives at `src/bekant/endstop.{c,h}`, the callback is registered
+in `src/user.c::InitApp()`, and the tick is called from
+`src/bekant/bctrl.c::bctrl_timer()`.
 
 ## Bonus: factory-reset support
 
@@ -331,9 +344,10 @@ The root cause is a missing endstop-detector module that the
 original IKEA firmware has. The fix is a small (~150 line)
 self-contained module that watches the encoder and forces a STOP
 when motion is commanded but no progress is being made. The
-fix is in `orig_reconstruction/bekant/orig_endstop.c`
+fix is in `src/bekant/endstop.c` (recovered from
+`orig_reconstruction/bekant/endstop.c`)
 and integrates with the existing ivanwick project via a single
-line in `user.c::InitApp()`.
+line in `user.c::InitApp()` plus one tick call in `bctrl_timer()`.
 
 As a bonus, the recovered BCMD constants reveal that ivanwick's
 guess at the LIN protocol is mostly wrong (only `0xfc` for STOP
